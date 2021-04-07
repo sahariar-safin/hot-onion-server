@@ -16,6 +16,7 @@ const uri = `mongodb+srv://${ process.env.DB_USER }:${ process.env.DB_PASS }@clu
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     const collection = client.db(`${ process.env.DB_NAME }`).collection("dishes");
+    const order = client.db(`${ process.env.DB_NAME }`).collection("orders");
 
     app.post('/addProduct', (req, res) => {
         collection.insertOne(req.body)
@@ -26,7 +27,6 @@ client.connect(err => {
 
     app.get('/products', (req, res) => {
         const dishCategory = req.query.category;
-        console.log(dishCategory);
         collection.find({
             category: dishCategory
         })
@@ -43,13 +43,22 @@ client.connect(err => {
     })
 
     app.delete('/delete', (req, res) => {
-        console.log(req.query.id);
         collection.deleteOne({
             _id: ObjectID(req.query.id)
         })
-        .then(response => {
-            console.log(response);
+            .then(response => {
+
+            })
+    })
+
+    app.get('/product', (req, res) => {
+        const dishId = req.query.id;
+        collection.find({
+            _id: ObjectID(dishId)
         })
+            .toArray((err, documents) => {
+                res.send(documents);
+            })
     })
 
 });
